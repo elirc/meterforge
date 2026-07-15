@@ -41,7 +41,6 @@ public sealed class PaymentAttempt
     public void Retry()
     {
         if (Status != PaymentStatus.Failed) throw new BusinessRuleException("payment.retry_invalid", "Only a failed payment can retry.");
-        ProviderIdempotencyKey = Guid.NewGuid().ToString("N");
         AttemptNumber++;
         Status = PaymentStatus.Pending;
     }

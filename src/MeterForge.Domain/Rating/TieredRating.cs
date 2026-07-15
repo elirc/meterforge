@@ -27,7 +27,7 @@ public static class TieredRater
         {
             if (quantity <= previousLimit) break;
             var upper = tier.UpTo ?? quantity;
-            var units = Math.Min(quantity, upper) - previousLimit + (previousLimit == 0 ? 0 : 1);
+            var units = Math.Min(quantity, upper) - previousLimit;
             if (units > 0)
             {
                 var amount = decimal.Round(units * tier.UnitPrice.Amount, 2, MidpointRounding.ToEven);
