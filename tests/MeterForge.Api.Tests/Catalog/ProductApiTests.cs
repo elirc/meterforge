@@ -36,4 +36,17 @@ public sealed class ProductApiTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         Assert.Equal("price.negative", problem?["code"].ToString());
     }
+
+    [Theory]
+    [InlineData("/health/live", "healthy")]
+    [InlineData("/health/ready", "ready")]
+    public async Task Health_ReturnsStatusAndTraceHeader(string path, string expectedStatus)
+    {
+        var response = await _client.GetAsync(path);
+        var payload = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(expectedStatus, payload?["status"].ToString());
+        Assert.True(response.Headers.Contains("X-Trace-Id"));
+    }
 }

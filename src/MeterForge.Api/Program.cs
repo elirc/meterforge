@@ -37,8 +37,20 @@ builder.Services.AddScoped<UsageIngestionService>();
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Trace-Id"] = context.TraceIdentifier;
+    await next(context).ConfigureAwait(false);
+});
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing")) app.MapOpenApi();
 app.MapGet("/health/live", () => Results.Ok(new { status = "healthy" }));
+app.MapGet("/health/ready", () => Results.Ok(new
+{
+    status = "ready",
+    storage = "in-memory-default",
+    postgresAdapterAvailable = true,
+    durableDefault = false,
+}));
 app.MapAdjustmentEndpoints();
 app.MapEntitlementEndpoints();
 app.MapInvoiceEndpoints();
