@@ -21,4 +21,11 @@ public sealed class InMemorySubscriptionRepository : ISubscriptionRepository
         _items.TryGetValue((tenantId, subscriptionId), out var subscription);
         return Task.FromResult(subscription);
     }
+
+    public Task SaveAsync(Subscription subscription, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _items[(subscription.TenantId, subscription.Id)] = subscription;
+        return Task.CompletedTask;
+    }
 }

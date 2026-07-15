@@ -6,6 +6,7 @@ public interface ISubscriptionRepository
 {
     Task AddAsync(Subscription subscription, CancellationToken cancellationToken);
     Task<Subscription?> GetAsync(string tenantId, Guid subscriptionId, CancellationToken cancellationToken);
+    Task SaveAsync(Subscription subscription, CancellationToken cancellationToken);
 }
 
 public sealed class SubscriptionService(ISubscriptionRepository repository)
@@ -18,4 +19,20 @@ public sealed class SubscriptionService(ISubscriptionRepository repository)
     }
 
     public Task<Subscription?> GetAsync(string tenantId, Guid id, CancellationToken cancellationToken) => repository.GetAsync(tenantId, id, cancellationToken);
+}
+
+public sealed class SubscriptionAmendmentService(ISubscriptionRepository repository)
+{
+    public async Task<Subscription?> ChangeProductAsync(
+        string tenantId, Guid subscriptionId, Guid productId, int expectedVersion, CancellationToken cancellationToken)
+    {
+        var subscription = await repository.GetAsync(tenantId, subscriptionId, cancellationToken).ConfigureAwait(false);
+        if (subscription is null) return null;
+        if (subscription.Version != expectedVersion)
+            throw new MeterForge.Domain.Common.BusinessRuleException("subscription.version_conflict", "Subscription changed since it was read.");
+
+        subscription.ChangeProduct(productId);
+        await repository.SaveAsync(subscription, cancellationToken).ConfigureAwait(false);
+        return subscription;
+    }
 }

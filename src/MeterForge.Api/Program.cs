@@ -22,6 +22,7 @@ builder.Services.AddSingleton<ISubscriptionRepository, InMemorySubscriptionRepos
 builder.Services.AddSingleton<IUsageEventStore, InMemoryUsageEventStore>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<SubscriptionAmendmentService>();
 builder.Services.AddScoped<UsageIngestionService>();
 
 var app = builder.Build();

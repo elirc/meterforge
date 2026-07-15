@@ -19,6 +19,15 @@ public static class SubscriptionEndpoints
             var subscription = await service.GetAsync(tenantId, id, cancellationToken);
             return subscription is null ? Results.NotFound() : Results.Ok(Map(subscription));
         });
+        group.MapPut("/{id:guid}/product", async (
+            string tenantId, Guid id, AmendSubscriptionProductRequest request, HttpRequest httpRequest,
+            SubscriptionAmendmentService service, CancellationToken cancellationToken) =>
+        {
+            if (!int.TryParse(httpRequest.Headers.IfMatch.ToString().Trim('"'), out var expectedVersion))
+                return Results.BadRequest(new { code = "subscription.if_match_required" });
+            var subscription = await service.ChangeProductAsync(tenantId, id, request.ProductId, expectedVersion, cancellationToken);
+            return subscription is null ? Results.NotFound() : Results.Ok(Map(subscription));
+        });
         return endpoints;
     }
 
