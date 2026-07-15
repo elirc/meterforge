@@ -27,5 +27,18 @@ public sealed class InvoiceTests
         Assert.Equal("invoice.empty", error.Code);
     }
 
+    [Fact]
+    public void AddLine_FinalizedInvoice_RejectsMutation()
+    {
+        var invoice = Create();
+        invoice.AddLine("Plan", new Money(49m, "USD"), Guid.NewGuid(), "subscription:1");
+        invoice.Finalize(DateTimeOffset.UtcNow);
+
+        var error = Assert.Throws<BusinessRuleException>(() =>
+            invoice.AddLine("Late line", new Money(1m, "USD"), null, "manual:1"));
+
+        Assert.Equal("invoice.finalized", error.Code);
+    }
+
     private static Invoice Create() => new(Guid.NewGuid(), "tenant-a", Guid.NewGuid(), "USD", new DateOnly(2026, 6, 1), new DateOnly(2026, 7, 1));
 }

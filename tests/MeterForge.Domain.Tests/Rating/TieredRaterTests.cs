@@ -27,4 +27,16 @@ public sealed class TieredRaterTests
 
         Assert.Equal("rating.currency_mismatch", error.Code);
     }
+
+    [Fact]
+    public void Rate_QuantityCrossingBoundary_ChargesEachUnitOnce()
+    {
+        var result = TieredRater.Rate(150, [
+            new UsageTier(100, new Money(1m, "USD")),
+            new UsageTier(null, new Money(0.50m, "USD")),
+        ]);
+
+        Assert.Equal(125m, result.Total.Amount);
+        Assert.Equal(50m, result.Tiers.Last().Units);
+    }
 }
