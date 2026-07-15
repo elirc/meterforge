@@ -19,4 +19,18 @@ public sealed class UsageIngestionTests
         Assert.True(replay.IsReplay);
         Assert.Equal(first.Event.Id, replay.Event.Id);
     }
+
+    [Fact]
+    public async Task Ingest_SameExternalIdInDifferentTenants_AcceptsBoth()
+    {
+        var service = new UsageIngestionService(new InMemoryUsageEventStore());
+        var occurredAt = new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.Zero);
+
+        var first = await service.IngestAsync("tenant-a", Guid.NewGuid(), "api_calls", 10, occurredAt, "shared-event", CancellationToken.None);
+        var second = await service.IngestAsync("tenant-b", Guid.NewGuid(), "api_calls", 10, occurredAt, "shared-event", CancellationToken.None);
+
+        Assert.False(first.IsReplay);
+        Assert.False(second.IsReplay);
+        Assert.NotEqual(first.Event.Id, second.Event.Id);
+    }
 }

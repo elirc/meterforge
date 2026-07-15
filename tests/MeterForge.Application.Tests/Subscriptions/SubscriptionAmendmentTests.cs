@@ -33,4 +33,35 @@ public sealed class SubscriptionAmendmentTests
 
         Assert.Equal("subscription.version_conflict", error.Code);
     }
+
+    [Fact]
+    public async Task ChangeProduct_TwoConcurrentWriters_ExactlyOneCommits()
+    {
+        var repository = new InMemorySubscriptionRepository();
+        var starter = new SubscriptionService(repository);
+        var amendment = new SubscriptionAmendmentService(repository);
+        var subscription = await starter.StartAsync("tenant-a", Guid.NewGuid(), new DateOnly(2026, 1, 1), null, CancellationToken.None);
+        using var start = new ManualResetEventSlim(false);
+
+        var writers = Enumerable.Range(0, 2).Select(_ => Task.Run(async () =>
+        {
+            start.Wait();
+            try
+            {
+                await amendment.ChangeProductAsync("tenant-a", subscription.Id, Guid.NewGuid(), 1, CancellationToken.None);
+                return true;
+            }
+            catch (BusinessRuleException error) when (error.Code == "subscription.version_conflict")
+            {
+                return false;
+            }
+        })).ToArray();
+        start.Set();
+
+        var results = await Task.WhenAll(writers);
+
+        Assert.Single(results, result => result);
+        Assert.Single(results, result => !result);
+        Assert.Equal(2, subscription.Version);
+    }
 }

@@ -9,11 +9,13 @@ public sealed class PaymentAttemptTests
     public void Retry_FailedAttempt_ReturnsToPendingAndIncrementsAttempt()
     {
         var payment = new PaymentAttempt(Guid.NewGuid(), "tenant-a", Guid.NewGuid(), new Money(10m, "USD"), "key-1");
+        var logicalKey = payment.ProviderIdempotencyKey;
         payment.Fail();
         payment.Retry();
 
         Assert.Equal(PaymentStatus.Pending, payment.Status);
         Assert.Equal(2, payment.AttemptNumber);
+        Assert.Equal(logicalKey, payment.ProviderIdempotencyKey);
     }
 
     [Fact]

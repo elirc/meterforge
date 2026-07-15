@@ -36,6 +36,7 @@ public sealed class Invoice
 
     public void AddLine(string description, Money amount, Guid? priceVersionId, string sourceReference)
     {
+        if (Status == InvoiceStatus.Finalized) throw new BusinessRuleException("invoice.finalized", "A finalized invoice cannot change.");
         if (amount.Currency != Currency) throw new BusinessRuleException("invoice.currency_mismatch", "Line currency must match the invoice.");
         if (amount.Amount < 0) throw new BusinessRuleException("invoice.line_negative", "Invoice lines cannot be negative.");
         if (string.IsNullOrWhiteSpace(description) || string.IsNullOrWhiteSpace(sourceReference))
