@@ -2,10 +2,13 @@ using MeterForge.Api.Catalog;
 using MeterForge.Api.Errors;
 using MeterForge.Api.Pricing;
 using MeterForge.Api.Subscriptions;
+using MeterForge.Api.Usage;
 using MeterForge.Application.Catalog;
 using MeterForge.Application.Subscriptions;
+using MeterForge.Application.Usage;
 using MeterForge.Infrastructure.Catalog;
 using MeterForge.Infrastructure.Subscriptions;
+using MeterForge.Infrastructure.Usage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +17,10 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<BusinessRuleExceptionHandler>();
 builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
 builder.Services.AddSingleton<ISubscriptionRepository, InMemorySubscriptionRepository>();
+builder.Services.AddSingleton<IUsageEventStore, InMemoryUsageEventStore>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<UsageIngestionService>();
 
 var app = builder.Build();
 
@@ -25,6 +30,7 @@ app.MapGet("/health/live", () => Results.Ok(new { status = "healthy" }));
 app.MapProductEndpoints();
 app.MapPricingEndpoints();
 app.MapSubscriptionEndpoints();
+app.MapUsageEndpoints();
 
 app.Run();
 
