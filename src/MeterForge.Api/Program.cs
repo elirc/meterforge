@@ -1,6 +1,7 @@
 using MeterForge.Api.Catalog;
 using MeterForge.Api.Errors;
 using MeterForge.Api.Pricing;
+using MeterForge.Api.Rating;
 using MeterForge.Api.Subscriptions;
 using MeterForge.Api.Usage;
 using MeterForge.Application.Catalog;
@@ -29,6 +30,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
 app.MapGet("/health/live", () => Results.Ok(new { status = "healthy" }));
 app.MapProductEndpoints();
 app.MapPricingEndpoints();
+app.MapRatingEndpoints();
 app.MapSubscriptionEndpoints();
 app.MapUsageEndpoints();
 
