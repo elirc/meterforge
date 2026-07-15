@@ -22,7 +22,7 @@ public sealed class Subscription
 
     public Guid Id { get; }
     public string TenantId { get; }
-    public Guid ProductId { get; }
+    public Guid ProductId { get; private set; }
     public DateOnly StartsOn { get; }
     public DateOnly? TrialEndsOn { get; }
     public SubscriptionStatus Status { get; private set; }
@@ -53,6 +53,14 @@ public sealed class Subscription
     {
         if (Status == SubscriptionStatus.Cancelled) Reject("subscription.cancel_invalid");
         Status = SubscriptionStatus.Cancelled;
+        Version++;
+    }
+
+    public void ChangeProduct(Guid productId)
+    {
+        if (Status == SubscriptionStatus.Cancelled) Reject("subscription.change_cancelled");
+        if (productId == Guid.Empty) throw new BusinessRuleException("subscription.product_required", "Product ID is required.");
+        ProductId = productId;
         Version++;
     }
 
