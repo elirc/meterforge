@@ -7,6 +7,7 @@ using MeterForge.Api.Integrations;
 using MeterForge.Api.Payments;
 using MeterForge.Api.Pricing;
 using MeterForge.Api.Rating;
+using MeterForge.Api.Reconciliation;
 using MeterForge.Api.Subscriptions;
 using MeterForge.Api.Usage;
 using MeterForge.Application.Catalog;
@@ -46,6 +47,7 @@ app.MapPaymentEndpoints();
 app.MapProductEndpoints();
 app.MapPricingEndpoints();
 app.MapRatingEndpoints();
+app.MapReconciliationEndpoints();
 app.MapSubscriptionEndpoints();
 app.MapUsageEndpoints();
 
