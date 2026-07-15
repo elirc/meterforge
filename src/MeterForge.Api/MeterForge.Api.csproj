@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\MeterForge.Application\MeterForge.Application.csproj" />
+    <ProjectReference Include="..\MeterForge.Contracts\MeterForge.Contracts.csproj" />
+    <ProjectReference Include="..\MeterForge.Infrastructure\MeterForge.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

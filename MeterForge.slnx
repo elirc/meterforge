@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MeterForge.Api/MeterForge.Api.csproj" />
+    <Project Path="src/MeterForge.Application/MeterForge.Application.csproj" />
+    <Project Path="src/MeterForge.Contracts/MeterForge.Contracts.csproj" />
+    <Project Path="src/MeterForge.Domain/MeterForge.Domain.csproj" />
+    <Project Path="src/MeterForge.Infrastructure/MeterForge.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MeterForge.Api.Tests/MeterForge.Api.Tests.csproj" />
+    <Project Path="tests/MeterForge.Application.Tests/MeterForge.Application.Tests.csproj" />
+    <Project Path="tests/MeterForge.Architecture.Tests/MeterForge.Architecture.Tests.csproj" />
+    <Project Path="tests/MeterForge.Domain.Tests/MeterForge.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

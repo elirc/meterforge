@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "meterforge.application": {
+        "type": "Project",
+        "dependencies": {
+          "MeterForge.Domain": "[1.0.0, )"
+        }
+      },
+      "meterforge.contracts": {
+        "type": "Project"
+      },
+      "meterforge.domain": {
+        "type": "Project"
+      },
+      "meterforge.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "MeterForge.Application": "[1.0.0, )",
+          "MeterForge.Domain": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

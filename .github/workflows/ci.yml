@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: dotnet restore MeterForge.slnx --locked-mode
+      - run: dotnet format MeterForge.slnx --verify-no-changes --no-restore
+      - run: dotnet build MeterForge.slnx --configuration Release --no-restore
+      - run: dotnet test MeterForge.slnx --configuration Release --no-build
+      - run: dotnet list MeterForge.slnx package --vulnerable --include-transitive
