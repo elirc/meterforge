@@ -1,5 +1,6 @@
 using MeterForge.Api.Adjustments;
 using MeterForge.Api.Catalog;
+using MeterForge.Api.Entitlements;
 using MeterForge.Api.Errors;
 using MeterForge.Api.Invoicing;
 using MeterForge.Api.Integrations;
@@ -38,6 +39,7 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing")) app.MapOpenApi();
 app.MapGet("/health/live", () => Results.Ok(new { status = "healthy" }));
 app.MapAdjustmentEndpoints();
+app.MapEntitlementEndpoints();
 app.MapInvoiceEndpoints();
 app.MapIntegrationEndpoints();
 app.MapPaymentEndpoints();
