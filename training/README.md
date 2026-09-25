@@ -1,7 +1,9 @@
 # MeterForge training pack (B07 apprenticeship, LAB tier) — focus: real SQL Server + EF Core
 
 MeterForge is a .NET 10 usage-billing teaching repo whose running app stores everything in memory. This pack adds a **runnable SQL Server
-track**: a SQL Server 2022 container, a branch with an EF Core SQL Server adapter and migrations, and five incidents reproduced on SQL Server.
+track**: a SQL Server 2022 container, a branch with an EF Core SQL Server adapter and migrations, and five SQL Server incidents (code on branches; live reproduction pending, see below).
+
+**Verification status:** everything that needs a live SQL Server is marked UNVERIFIED, with the exact command to run it (`lab/sqlserver/evidence/README.md`). Docker failed on the authoring machine before the container could start; the code builds and the generated SQL/DDL is real tool output.
 
 Nothing here changes `main`'s source. SQL Server code lives only on branches:
 

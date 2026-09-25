@@ -1,0 +1,26 @@
+# Generated offline on 2026-09-24 with EF Core 10.0.12 + Microsoft.Data.SqlClient (ToQueryString; no database needed).
+
+-- EF LINQ dedupe lookup (lab branch shape):
+DECLARE @p int = 1;
+DECLARE @tenantId varchar(64) = 'tenant-0042';
+DECLARE @externalEventId varchar(128) = 'evt_7hQ2mZx1';
+
+-- usage-dedupe-lookup
+
+SELECT TOP(@p) [u].[seq], [u].[external_event_id], [u].[id], [u].[ingested_at], [u].[meter], [u].[occurred_at], [u].[quantity], [u].[rolled_up], [u].[subscription_id], [u].[tenant_id]
+FROM [billing].[usage_events] AS [u]
+WHERE [u].[tenant_id] = @tenantId AND [u].[external_event_id] = @externalEventId
+
+-- FromSqlRaw with untyped SqlParameter (incident 003 shape):
+DECLARE @p1 int = 1;
+DECLARE @tenant nvarchar(11) = N'tenant-0042';
+DECLARE @external nvarchar(12) = N'evt_7hQ2mZx1';
+
+-- usage-dedupe-lookup
+
+SELECT TOP(@p1) [m].[seq], [m].[external_event_id], [m].[id], [m].[ingested_at], [m].[meter], [m].[occurred_at], [m].[quantity], [m].[rolled_up], [m].[subscription_id], [m].[tenant_id]
+FROM (
+    SELECT * FROM billing.usage_events WITH (UPDLOCK) WHERE tenant_id = @tenant AND external_event_id = @external
+) AS [m]
+
+-- untyped SqlParameter inferred SqlDbType: NVarChar, DbType: String

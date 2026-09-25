@@ -1,0 +1,11 @@
+# Generated offline on 2026-09-24 against the incident 005 model (no database needed).
+
+EF LOG: warn: 9/24/2026 17:16:40.563 SqlServerEventId.DecimalTypeDefaultWarning[30000] (Microsoft.EntityFrameworkCore.Model.Validation) 
+      No store type was specified for the decimal property 'Amount' on entity type 'ProrationCreditRow'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+store type for ProrationCreditRow.Amount: decimal(18,2)
+C# value computed by RecordAsync: 27.766666666666666666666666667
+DECLARE @value decimal(18,2) = 27.766666666666666666666666667;
+SqlDecimal.AdjustScale(to 2, fRound:false) = 27.76
+SqlDecimal.AdjustScale(to 2, fRound:true)  = 27.77
+SqlDecimal.ConvertToPrecScale(18,2)        = 27.77
+decimal.Round(value, 2, ToEven)            = 27.77

@@ -1,0 +1,28 @@
+# Generated offline on 2026-09-24 with EF Core 10.0.12 (ToQueryString; no database needed).
+# lab branch (EF.Constant) then incident 001 branch (parameterized). Regenerate: SqlLab summary tenant-0001 --repeat 0 --show-sql
+
+== lab
+DECLARE @from datetimeoffset = '2026-09-01T00:00:00.0000000+00:00';
+DECLARE @to datetimeoffset = '2026-09-08T00:00:00.0000000+00:00';
+
+-- usage-summary
+
+SELECT [u].[subscription_id] AS [SubscriptionId], [u].[meter] AS [Meter], COALESCE(SUM([u].[quantity]), 0.0) AS [Total], COUNT(*) AS [Count]
+FROM [billing].[usage_events] AS [u]
+WHERE [u].[tenant_id] = 'tenant-0001' AND [u].[occurred_at] >= @from AND [u].[occurred_at] < @to
+GROUP BY [u].[subscription_id], [u].[meter]
+(printed with the same shape as UsageReadModel.SummarizeAsync; keep them in sync)
+
+== inc-001
+DECLARE @_8__locals1_tenant varchar(64) = 'tenant-0001';
+DECLARE @from datetimeoffset = '2026-09-01T00:00:00.0000000+00:00';
+DECLARE @to datetimeoffset = '2026-09-08T00:00:00.0000000+00:00';
+
+-- usage-summary
+
+SELECT [u].[subscription_id] AS [SubscriptionId], [u].[meter] AS [Meter], COALESCE(SUM([u].[quantity]), 0.0) AS [Total], COUNT(*) AS [Count]
+FROM [billing].[usage_events] AS [u]
+WHERE [u].[tenant_id] = @_8__locals1_tenant AND [u].[occurred_at] >= @from AND [u].[occurred_at] < @to
+GROUP BY [u].[subscription_id], [u].[meter]
+(printed with the same shape as UsageReadModel.SummarizeAsync; keep them in sync)
+

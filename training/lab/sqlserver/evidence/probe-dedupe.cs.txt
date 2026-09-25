@@ -1,0 +1,17 @@
+// .NET 10 file-based app: save as .cs, point #:project at a worktree of the matching branch, then `dotnet run <file>.cs`.
+#:project <your-worktree>/src/MeterForge.Infrastructure.SqlServer/MeterForge.Infrastructure.SqlServer.csproj
+#:property PublishAot=false
+using MeterForge.Infrastructure.SqlServer;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+var db = new MeterForgeDbContext(new DbContextOptionsBuilder<MeterForgeDbContext>().UseSqlServer("Server=unused;Database=x").Options);
+var tenantId = "tenant-0042"; var externalEventId = "evt_7hQ2mZx1";
+Console.WriteLine("-- EF LINQ dedupe lookup (lab branch shape):");
+Console.WriteLine(db.UsageEvents.AsNoTracking().TagWith("usage-dedupe-lookup").Where(e => e.TenantId == tenantId && e.ExternalEventId == externalEventId).Take(1).ToQueryString());
+Console.WriteLine();
+Console.WriteLine("-- FromSqlRaw with untyped SqlParameter (incident 003 shape):");
+Console.WriteLine(db.UsageEvents.FromSqlRaw("SELECT * FROM billing.usage_events WITH (UPDLOCK) WHERE tenant_id = @tenant AND external_event_id = @external",
+    new SqlParameter("@tenant", tenantId), new SqlParameter("@external", externalEventId)).AsNoTracking().TagWith("usage-dedupe-lookup").Take(1).ToQueryString());
+var p = new SqlParameter("@tenant", tenantId);
+Console.WriteLine();
+Console.WriteLine("-- untyped SqlParameter inferred SqlDbType: " + p.SqlDbType + ", DbType: " + p.DbType);

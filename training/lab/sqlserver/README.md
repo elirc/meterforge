@@ -4,6 +4,10 @@ MeterForge ships with in-memory adapters and one Npgsql adapter that nothing wir
 **SQL Server 2022 + EF Core 10** persistence layer for usage metering. It lives only on the branch **`training/lab/sqlserver`**
 and is never merged to `main`.
 
+> **Status (2026-09-24):** the branches build and the non-database tests pass, but Docker broke on the authoring machine before the container
+> started, so `start-sqlserver.ps1`, `SqlLab migrate/seed/soak/bench-sniff` and the SQL Server tests have **not yet been run against a live server**.
+> `evidence/README.md` lists every UNVERIFIED check with its exact command and expected result. Running them is your first job (J1).
+
 ## What the lab branch adds (read these files; they are what the exercises talk about)
 
 | Path on `training/lab/sqlserver` | What it is |
@@ -51,8 +55,8 @@ Azure Data Studio and SSMS also work against `localhost,14337`, and they draw th
 | `sql/03-blocking-and-deadlocks.sql` | M3, INC-002: live blocking chain + deadlock graphs from the `system_health` session |
 | `sql/04-index-usage.sql` | M2, S2: which indexes are read, their size, and statistics age |
 
-`evidence/` holds output that was captured while building this lab against a real container (plans, timings, deadlock graph).
-Try the exercise first, then compare with it.
+`evidence/` holds reference output generated offline (migration DDL, the SQL EF sends, parameter types) and the list of checks that
+still need a live server, with expected results (`evidence/README.md`). Try the exercise first, then compare.
 
 ## Tear down
 

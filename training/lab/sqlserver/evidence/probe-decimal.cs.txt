@@ -1,0 +1,19 @@
+// .NET 10 file-based app: save as .cs, point #:project at a worktree of the matching branch, then `dotnet run <file>.cs`.
+#:project <your-worktree>/src/MeterForge.Infrastructure.SqlServer/MeterForge.Infrastructure.SqlServer.csproj
+#:property PublishAot=false
+using System.Data.SqlTypes;
+using MeterForge.Infrastructure.SqlServer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+var db = new MeterForgeDbContext(new DbContextOptionsBuilder<MeterForgeDbContext>().UseSqlServer("Server=unused;Database=x")
+    .LogTo(line => { if (line.Contains("decimal", StringComparison.OrdinalIgnoreCase)) Console.WriteLine("EF LOG: " + line.Trim()); }, LogLevel.Warning).Options);
+var amount = db.Model.FindEntityType(typeof(ProrationCreditRow))!.FindProperty(nameof(ProrationCreditRow.Amount))!;
+Console.WriteLine("store type for ProrationCreditRow.Amount: " + amount.GetColumnType());
+var value = 49.00m * 17 / 30;
+Console.WriteLine("C# value computed by RecordAsync: " + value);
+Console.WriteLine(db.ProrationCredits.Where(c => c.Amount == value).ToQueryString().Split('\n')[0]);
+var d = new SqlDecimal(value);
+Console.WriteLine("SqlDecimal.AdjustScale(to 2, fRound:false) = " + SqlDecimal.AdjustScale(d, 2 - d.Scale, false));
+Console.WriteLine("SqlDecimal.AdjustScale(to 2, fRound:true)  = " + SqlDecimal.AdjustScale(d, 2 - d.Scale, true));
+Console.WriteLine("SqlDecimal.ConvertToPrecScale(18,2)        = " + SqlDecimal.ConvertToPrecScale(d, 18, 2));
+Console.WriteLine("decimal.Round(value, 2, ToEven)            = " + decimal.Round(value, 2, MidpointRounding.ToEven));

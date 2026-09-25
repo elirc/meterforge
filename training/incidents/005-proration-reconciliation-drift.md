@@ -5,7 +5,7 @@
 **Alert (daily reconciliation report, October 2)**
 ```
 reconciliation/payments  amount_mismatch: 1,318 of 41,902 payments (3.1%)   baseline < 0.05%
-all mismatches: difference = +0.01 USD (provider amount higher than ours)
+all mismatches: |difference| = 0.01 USD, always on the proration credit
 ```
 
 **What finance saw**
