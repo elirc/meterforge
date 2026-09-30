@@ -10,13 +10,15 @@ public sealed class BusinessRuleExceptionHandler(IProblemDetailsService problemD
     {
         if (exception is not BusinessRuleException businessRule) return false;
 
-        context.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+        var status = businessRule.Code == "usage.idempotency_conflict"
+            ? StatusCodes.Status409Conflict : StatusCodes.Status422UnprocessableEntity;
+        context.Response.StatusCode = status;
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = context,
             ProblemDetails = new ProblemDetails
             {
-                Status = StatusCodes.Status422UnprocessableEntity,
+                Status = status,
                 Title = "Business rule violation",
                 Detail = businessRule.Message,
                 Extensions = { ["code"] = businessRule.Code, ["traceId"] = context.TraceIdentifier },

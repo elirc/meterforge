@@ -1,0 +1,76 @@
+using MeterForge.Domain.Common;
+using MeterForge.Domain.Adjustments;
+using MeterForge.Domain.Entitlements;
+using MeterForge.Domain.Invoicing;
+using MeterForge.Domain.Payments;
+using MeterForge.Domain.Reconciliation;
+using MeterForge.Application.Payments;
+using MeterForge.Application.Persistence;
+
+var passed = 0;
+var failed = 0;
+void Check(bool value) { if (!value) throw new Exception("Prediction disagreed"); }
+void Test(string name, Action body)
+{
+    try { body(); passed++; Console.WriteLine($"PASS {name}"); }
+    catch (Exception error) { failed++; Console.WriteLine($"FAIL {name}: {error.Message}"); }
+}
+Invoice Draft() => new(Guid.NewGuid(), "synthetic-tenant", Guid.NewGuid(), "USD", new DateOnly(2030, 1, 1), new DateOnly(2030, 2, 1));
+Test("discount returns reduction rather than net", () => {
+    var original = new Money(19.99m, "USD");
+    Check(new PercentageDiscount("demo", 10).Apply(original).Amount == 2m);
+    Check(original.Amount == 19.99m);
+});
+Test("entitlement preflights do not reserve", () => {
+    Entitlement[] values = [new("requests", 10)];
+    Check(EntitlementEvaluator.Evaluate(values, "requests", 6, 3).Allowed);
+    Check(EntitlementEvaluator.Evaluate(values, "requests", 6, 3).Allowed);
+});
+Test("unlimited remains nullable evidence", () => {
+    var result = EntitlementEvaluator.Evaluate([new Entitlement("exports", null)], "exports", 500, 1);
+    Check(result.Allowed && result.Remaining is null && result.Reason == "unlimited");
+});
+Test("duplicate normalized features are ambiguous", () => {
+    try { EntitlementEvaluator.Evaluate([new Entitlement(" X ", 1), new Entitlement("x", 2)], "x", 0, 1); }
+    catch (InvalidOperationException) { return; }
+    throw new Exception("Expected duplicate lookup exception");
+});
+Test("individual refunds do not enforce cumulative limit", () => {
+    var payment = Guid.NewGuid(); var original = new Money(100, "USD");
+    var first = new Refund(Guid.NewGuid(), "synthetic", payment, original, new Money(70, "USD"), "fixture", DateTimeOffset.UnixEpoch);
+    var second = new Refund(Guid.NewGuid(), "synthetic", payment, original, new Money(70, "USD"), "fixture", DateTimeOffset.UnixEpoch);
+    Check(first.Amount.Amount + second.Amount.Amount == 140);
+});
+Test("snapshot array mutation does not mutate invoice", () => {
+    var invoice = Draft(); invoice.AddLine("fixture", new Money(10, "USD"), null, "synthetic-source");
+    invoice.Finalize(DateTimeOffset.UnixEpoch); var snapshot = InvoiceSnapshot.From(invoice);
+    var values = (InvoiceLineSnapshot[])snapshot.Lines; values[0] = values[0] with { Amount = 99 };
+    Check(snapshot.Lines.Single().Amount == 99 && invoice.Total.Amount == 10);
+});
+Test("provider exception leaves retried attempt pending", () => {
+    var provider = new RecordingProvider(true); var service = new PaymentService(provider);
+    var attempt = new PaymentAttempt(Guid.NewGuid(), "synthetic", Guid.NewGuid(), new Money(10, "USD"), "synthetic-key");
+    attempt.Fail();
+    try { service.RetryAsync(attempt, CancellationToken.None).GetAwaiter().GetResult(); }
+    catch (IOException) {
+        Check(attempt.Status == PaymentStatus.Pending && attempt.AttemptNumber == 2);
+        Check(provider.Requests.Single().IdempotencyKey == "synthetic-key"); return;
+    }
+    throw new Exception("Expected ambiguous provider exception");
+});
+Test("reconciliation preserves provider minus internal sign", () => {
+    Check(PaymentReconciler.Compare(new Money(100, "USD"), new Money(99, "USD")).Difference.Amount == -1);
+});
+Console.WriteLine($"{passed} passed; {failed} failed");
+Environment.ExitCode = failed == 0 ? 0 : 1;
+
+sealed class RecordingProvider(bool failAfterRecording) : IPaymentProvider
+{
+    public List<ProviderChargeRequest> Requests { get; } = [];
+    public Task<ProviderChargeResult> ChargeAsync(ProviderChargeRequest request, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested(); Requests.Add(request);
+        if (failAfterRecording) throw new IOException("Synthetic effect recorded before acknowledgment loss");
+        return Task.FromResult(new ProviderChargeResult(true, "synthetic-reference"));
+    }
+}

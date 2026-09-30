@@ -7,6 +7,13 @@ public static class UsageEndpoints
 {
     public static IEndpointRouteBuilder MapUsageEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapGet("/api/v1/tenants/{tenantId}/usage-events/{id:guid}", async (
+            string tenantId, Guid id, IUsageEventStore store, CancellationToken cancellationToken) =>
+        {
+            var usage = await store.FindByIdAsync(tenantId, id, cancellationToken);
+            return usage is null ? Results.NotFound() : Results.Ok(new UsageEventResponse(
+                usage.Id, usage.SubscriptionId, usage.Meter, usage.Quantity, usage.OccurredAt, usage.ExternalEventId, false));
+        }).WithTags("Usage");
         endpoints.MapPost("/api/v1/tenants/{tenantId}/usage-events", async (
             string tenantId, IngestUsageRequest request, UsageIngestionService service, CancellationToken cancellationToken) =>
         {

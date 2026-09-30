@@ -22,7 +22,11 @@ using MeterForge.Infrastructure.Usage;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddProblemDetails();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+        context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+});
 builder.Services.AddExceptionHandler<BusinessRuleExceptionHandler>();
 builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
 builder.Services.AddSingleton<IPaymentProvider, SimulatedPaymentProvider>();
@@ -36,12 +40,17 @@ builder.Services.AddScoped<UsageIngestionService>();
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Trace-Id"] = context.TraceIdentifier;
+    // Error handling may clear headers before writing its response.
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers["X-Trace-Id"] = context.TraceIdentifier;
+        return Task.CompletedTask;
+    });
     await next(context).ConfigureAwait(false);
 });
+app.UseExceptionHandler();
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing")) app.MapOpenApi();
 app.MapGet("/health/live", () => Results.Ok(new { status = "healthy" }));
 app.MapGet("/health/ready", () => Results.Ok(new

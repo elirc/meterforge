@@ -8,17 +8,16 @@ public sealed class InMemoryUsageEventStore : IUsageEventStore
 {
     private readonly ConcurrentDictionary<(string TenantId, string ExternalEventId), UsageEvent> _events = new();
 
-    public Task<UsageEvent?> FindByExternalIdAsync(string tenantId, string externalEventId, CancellationToken cancellationToken)
+    public Task<UsageEvent?> FindByIdAsync(string tenantId, Guid id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        _events.TryGetValue((tenantId, externalEventId), out var usageEvent);
-        return Task.FromResult(usageEvent);
+        return Task.FromResult(_events.Values.FirstOrDefault(item => item.TenantId == tenantId && item.Id == id));
     }
 
-    public Task AddAsync(UsageEvent usageEvent, CancellationToken cancellationToken)
+    public Task<UsageEvent> GetOrAddAsync(UsageEvent candidate, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        _events.TryAdd((usageEvent.TenantId, usageEvent.ExternalEventId), usageEvent);
-        return Task.CompletedTask;
+        var stored = _events.GetOrAdd((candidate.TenantId, candidate.ExternalEventId), candidate);
+        return Task.FromResult(stored);
     }
 }

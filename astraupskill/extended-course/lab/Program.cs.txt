@@ -1,0 +1,48 @@
+using MeterForge.Application.Usage;
+using MeterForge.Infrastructure.Usage;
+using MeterForge.Domain.Common;
+
+int passed = 0, failed = 0;
+var subscription = Guid.Parse("00000000-0000-0000-0000-000000000001");
+var at = new DateTimeOffset(2026, 7, 1, 12, 0, 0, TimeSpan.Zero);
+await Check("normalized replay retains winner", async () => {
+    var service = new UsageIngestionService(new InMemoryUsageEventStore());
+    var first = await service.IngestAsync("tenant", subscription, " requests ", 3, at, " event ", default);
+    var replay = await service.IngestAsync("tenant", subscription, "requests", 3, at.ToOffset(TimeSpan.FromHours(2)), "event", default);
+    Require(!first.IsReplay && replay.IsReplay && first.Event.Id == replay.Event.Id);
+});
+await Check("quantity conflict preserves original", async () => {
+    var store = new InMemoryUsageEventStore(); var service = new UsageIngestionService(store);
+    var first = await service.IngestAsync("tenant", subscription, "requests", 3, at, "event", default);
+    bool rejected = false;
+    try { await service.IngestAsync("tenant", subscription, "requests", 4, at, "event", default); }
+    catch (BusinessRuleException e) when (e.Code == "usage.idempotency_conflict") { rejected = true; }
+    Require(rejected && (await store.FindByIdAsync("tenant", first.Event.Id, default))?.Quantity == 3);
+});
+await Check("tenant keys remain distinct", async () => {
+    var service = new UsageIngestionService(new InMemoryUsageEventStore());
+    var first = await service.IngestAsync("tenant", subscription, "requests", 3, at, "event", default);
+    var second = await service.IngestAsync(" tenant ", subscription, "requests", 3, at, "event", default);
+    Require(!second.IsReplay && first.Event.Id != second.Event.Id);
+});
+await Check("pre-cancellation stores nothing", async () => {
+    var service = new UsageIngestionService(new InMemoryUsageEventStore());
+    using var cancel = new CancellationTokenSource(); cancel.Cancel();
+    bool rejected = false;
+    try { await service.IngestAsync("tenant", subscription, "requests", 3, at, "event", cancel.Token); }
+    catch (OperationCanceledException) { rejected = true; }
+    var next = await service.IngestAsync("tenant", subscription, "requests", 3, at, "event", default);
+    Require(rejected && !next.IsReplay);
+});
+await Check("independent stores are independent authorities", async () => {
+    var first = await new UsageIngestionService(new InMemoryUsageEventStore()).IngestAsync("tenant", subscription, "requests", 3, at, "event", default);
+    var second = await new UsageIngestionService(new InMemoryUsageEventStore()).IngestAsync("tenant", subscription, "requests", 3, at, "event", default);
+    Require(!first.IsReplay && !second.IsReplay && first.Event.Id != second.Event.Id);
+});
+Console.WriteLine($"{passed} passed; {failed} failed");
+return failed == 0 ? 0 : 1;
+async Task Check(string name, Func<Task> test) {
+    try { await test(); passed++; Console.WriteLine("PASS " + name); }
+    catch (Exception e) { failed++; Console.WriteLine("FAIL " + name + ": " + e.Message); }
+}
+static void Require(bool condition) { if (!condition) throw new Exception("Prediction disagreed"); }

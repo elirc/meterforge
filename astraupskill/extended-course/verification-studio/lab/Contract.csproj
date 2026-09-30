@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../../src/MeterForge.Domain/Common/BusinessRuleException.cs" Link="BusinessRuleException.cs" />
+    <Compile Include="../../../../src/MeterForge.Domain/Common/Money.cs" Link="Money.cs" />
+    <Compile Include="../../../../src/MeterForge.Domain/Rating/TieredRating.cs" Link="TieredRating.cs" />
+    <Compile Include="../../../../src/MeterForge.Domain/Usage/UsageEvent.cs" Link="UsageEvent.cs" />
+    <Compile Include="../../../../src/MeterForge.Application/Usage/UsageIngestionService.cs" Link="UsageIngestionService.cs" />
+    <Compile Include="../../../../src/MeterForge.Infrastructure/Usage/InMemoryUsageEventStore.cs" Link="InMemoryUsageEventStore.cs" />
+  </ItemGroup>
+</Project>

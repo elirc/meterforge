@@ -1,5 +1,7 @@
 # MeterForge
 
+Start the detailed CRUD and reliability course in [astraupskill/README.md](astraupskill/README.md): source walkthroughs, a worked ingestion repair, tests, exercises, solutions and a request trace lab.
+
 MeterForge is a complete fifteen-sprint C#/.NET teaching repository for a fictional multi-tenant usage-based subscription billing platform. It is designed to help a junior software engineer grow toward mid-level ownership through business rules, API design, persistence, concurrency, integrations, testing, and operations.
 
 It is an original educational product—not a Stripe clone, payment processor, accounting system, or production financial service. All tenants, providers, money flows, and policies are synthetic fixtures.
