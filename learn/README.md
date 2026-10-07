@@ -1,8 +1,12 @@
 # Learn MeterForge: a study guide for a junior developer (B08)
 
+> **Status note (2026-10-06).** This guide was written on 2026-09-26 against `main` @ `43ee18d`. Two things have changed since then:
+> - **Usage ingestion is fixed.** Commit `4e3f344` replaced find-then-`TryAdd` with an atomic `GetOrAddAsync`, normalized the key first, and returns 409 on a changed payload. The "phantom id" bug that sessions 1–2 and on-ramp 4–5 study now exists only at `43ee18d`, so do those exercises in a worktree of that commit (on-ramp 5 shows the command). On today's `main`, `Ingest_NormalizedReplay_ReturnsOriginalIdentity` is the test that "flipped".
+> - **The lab and incident branches are not on GitHub.** `git ls-remote origin` lists only `main`. From a fresh clone, on-ramp 6–7 and sessions 3, 5–8 can be read but not run. See the status note in [`training/README.md`](../training/README.md).
+
 ## What this app is and why it's in the portfolio
 MeterForge is a .NET 10 usage-metering and billing API: tenants send usage events, and those events are rated in tiers and turned into invoices.
-On `main` everything lives in memory (`src/MeterForge.Api/Program.cs:27-35`, `src/MeterForge.Infrastructure/Usage/InMemoryUsageEventStore.cs`).
+On `main` everything lives in memory (`src/MeterForge.Api/Program.cs:31-39` on today's `main`; `27-35` at `43ee18d`, `src/MeterForge.Infrastructure/Usage/InMemoryUsageEventStore.cs`).
 It's in the portfolio as the **SQL Server lab**. The branch `training/lab/sqlserver` adds a real EF Core SQL Server adapter
 (`src/MeterForge.Infrastructure.SqlServer/`), a load harness (`tools/MeterForge.SqlLab`) and five SQL Server incidents, as described in `training/README.md`.
 Billing is where a lost event or a wrong cent is a customer complaint, so what you practise here is getting correctness right, not just getting the code to run.
@@ -27,13 +31,13 @@ Billing is where a lost event or a wrong cent is a customer complaint, so what y
 | # | You need | Where to learn it |
 |---|---|---|
 | 1 | C# records, `decimal` vs `double`, `async/await` basics | Read `src/MeterForge.Domain/Common/Money.cs` and `src/MeterForge.Domain/Rating/TieredRating.cs`, then do onramp 1 and 2 |
-| 2 | ASP.NET Core minimal APIs and dependency injection (singleton vs scoped) | `src/MeterForge.Api/Program.cs:22-35`, `src/MeterForge.Api/Usage/UsageEndpoints.cs`. Then globehire's INC-001 is the deep dive on lifetimes |
-| 3 | SQL basics: primary key, unique index, what an index seek is | [curriculum 10: plans and indexes](../../opusorganize/apprenticeship/curriculum/10-query-plans-and-indexes.md) |
-| 4 | How SQL Server differs from Postgres (collation, `varchar`/`nvarchar`, `decimal(p,s)`) | [curriculum 22: SQL Server for Postgres developers](../../opusorganize/apprenticeship/curriculum/22-sqlserver-for-postgres-devs.md) |
-| 5 | Idempotency: why the same event may arrive twice | [curriculum 02: idempotency](../../opusorganize/apprenticeship/curriculum/02-idempotency.md) |
-| 6 | Checking code you didn't write | [curriculum 05: verify before trust](../../opusorganize/apprenticeship/curriculum/05-verify-before-trust.md) |
+| 2 | ASP.NET Core minimal APIs and dependency injection (singleton vs scoped) | `src/MeterForge.Api/Program.cs:22-39`, `src/MeterForge.Api/Usage/UsageEndpoints.cs`. Then INC-001 in the sibling `globehire` repo is the deep dive on lifetimes |
+| 3 | SQL basics: primary key, unique index, what an index seek is | curriculum 10: plans and indexes (apprenticeship page `10-query-plans-and-indexes`, not in this repo) |
+| 4 | How SQL Server differs from Postgres (collation, `varchar`/`nvarchar`, `decimal(p,s)`) | curriculum 22: SQL Server for Postgres developers (apprenticeship page `22-sqlserver-for-postgres-devs`, not in this repo) |
+| 5 | Idempotency: why the same event may arrive twice | curriculum 02: idempotency (apprenticeship page `02-idempotency`, not in this repo) |
+| 6 | Checking code you didn't write | curriculum 05: verify before trust (apprenticeship page `05-verify-before-trust`, not in this repo) |
 
-Money precision (INC-005) also uses [curriculum 20: money and time](../../opusorganize/apprenticeship/curriculum/20-money-and-time.md).
+Money precision (INC-005) also uses curriculum 20: money and time (apprenticeship page `20-money-and-time`, not in this repo).
 
 **Rules for every session:** `main`'s working tree holds your own uncommitted work in the Usage area. Never switch it to another branch.
 For branches, use `git worktree add ..\mf-<name> <branch>`. For a clean copy of `main`, use `git worktree add --detach ..\mf-main HEAD`.
@@ -44,7 +48,7 @@ Legend: **[HAND]** means you do it yourself. **[AGENT]** means you may hand it t
 | # | Session (time) | What you do | Exit criterion (you can check it) |
 |---|---|---|---|
 | 1 | **Read and trace** (60 min) | [HAND] `learn/00-onramp.md` exercises 1–4: Money, TieredRater, then trace `POST /usage-events` end to end. [AGENT] You may ask an agent "list every file a usage event passes through", then check its list against your own trace. | You can draw the request path (endpoint → service → store) from memory, and you predicted onramp 4 correctly *before* checking. |
-| 2 | **First test** (60 min) | [HAND] Onramp 5: write the characterization test that pins the phantom-id behaviour, in a detached worktree. [AGENT] You may let an agent write the xUnit boilerplate, but you write the assertion. | The test **passes on `main`** (it pins today's behaviour), and you can explain in one sentence why that behaviour is a bug. |
+| 2 | **First test** (60 min) | [HAND] Onramp 5: write the characterization test that pins the phantom-id behaviour, in a detached worktree. [AGENT] You may let an agent write the xUnit boilerplate, but you write the assertion. | The test **passes on `43ee18d`** (it pins that commit's behaviour; on today's `main` the bug is fixed and the test would fail), and you can explain in one sentence why that behaviour is a bug. |
 | 3 | **Schema on the lab branch** (60 min) | [HAND] Onramp 6–7: read `MeterForgeDbContext.cs` on `training/lab/sqlserver` and generate the migration script offline. Then read `training/navigation/ARCHITECTURE.md` and `FIRST_CHANGE.md`. | You can explain the clustered key and the four indexes on `usage_events` and why `external_event_id` has a BIN2 collation, without notes. |
 | 4 | **Blind review** (90 min) | [HAND] `training/review/EXERCISE.md` (60 min, no agent), then `COMPARE.md`, then `_answers/review.md`. | At least 8 findings with `path:line`. `COMPARE.md` is filled in *before* you open the answer. |
 | 5 | **Run it on SQL Server: J1** (60–90 min) | Needs Docker (see above). [HAND] The "Explain before touching" answers in `training/ladder/J1-run-meterforge-on-sqlserver.md`. [AGENT] Container start-up and HTTP calls can be scripted by an agent. You read the output. | Two POSTs give 201, then 200 with `isReplay: true`. One row in `billing.usage_events`. **No Docker yet?** Do J1's explain-first questions and the J1 answer's reading instead, and mark the session "UNVERIFIED". |
@@ -68,5 +72,5 @@ After session 10, continue with the rest of `training/README.md` in its suggeste
 - The `evidence/README.md` checklist run on a live SQL Server with your own numbers. Until Docker is fixed, this stays open, and that's fine.
 - You can explain all 5 incidents, each in one sentence of mechanism (not vocabulary).
 
-**Next repo:** `Desktop\gitvg\atlas` (the other SQL Server practice in the competency graph: its M1 query work plus an Azure deploy design).
-Its release and migration material builds on S1 here. If you want more .NET DI and time-handling fundamentals first, do `Desktop\globehire`.
+**Next repo:** `atlas` (github.com/elirc/atlas: the other SQL Server practice in the competency graph: its M1 query work plus an Azure deploy design).
+Its release and migration material builds on S1 here. If you want more .NET DI and time-handling fundamentals first, do the sibling `globehire` repo.

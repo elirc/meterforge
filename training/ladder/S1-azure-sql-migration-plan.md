@@ -22,5 +22,5 @@ Budget: one extra Azure SQL tier for 6 weeks.
 - Which MeterForge data is append-only and which is mutable? Why does that decide your replication strategy per table?
 - What does "zero downtime" mean for the SDK (which retries) vs for the finance user (who runs invoicing)?
 
-Link: [07 — zero-downtime migrations](../../../opusorganize/apprenticeship/curriculum/07-zero-downtime-migrations.md), [13 — release safety](../../../opusorganize/apprenticeship/curriculum/13-release-safety.md).
+Link: 07 — zero-downtime migrations (apprenticeship page `07-zero-downtime-migrations`, not in this repo), 13 — release safety (apprenticeship page `13-release-safety`, not in this repo).
 Answer (reference design + rubric): [`_answers/S1.md`](../_answers/S1.md)

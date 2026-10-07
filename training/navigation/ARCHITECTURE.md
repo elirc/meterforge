@@ -2,6 +2,8 @@
 
 Commit `43ee18d` on `main`, plus the lab branch `training/lab/sqlserver` where noted. Every claim has a path.
 
+> **Note added 2026-10-06.** This page is a record of `43ee18d`. On today's `main`, commit `4e3f344` has replaced the usage-ingestion steps below (find-then-`TryAdd`) with an atomic `GetOrAddAsync` that returns the stored winner and a 409 on a changed payload, and the `Program.cs` registrations are at lines 31–39. The rest of the system context still matches today's `main`. The lab branch is not on GitHub.
+
 ## System context
 - One ASP.NET Core 10 minimal-API process (`src/MeterForge.Api/Program.cs`). No auth, no background workers, no message broker.
 - Storage at runtime: **in-memory only** (`Program.cs:27-30` registers four `InMemory*`/`Simulated*` singletons).

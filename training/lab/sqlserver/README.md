@@ -65,7 +65,7 @@ still need a live server, with expected results (`evidence/README.md`). Try the 
 git worktree remove ..\meterforge-sqllab
 ```
 
-Concepts: [10 — plans and indexes](../../../../opusorganize/apprenticeship/curriculum/10-query-plans-and-indexes.md) ·
-[07 — zero-downtime migrations](../../../../opusorganize/apprenticeship/curriculum/07-zero-downtime-migrations.md) ·
-[03 — concurrency](../../../../opusorganize/apprenticeship/curriculum/03-concurrency-races.md).
-(The curriculum lives in `Desktop\opusorganize\apprenticeship\curriculum\`.)
+Concepts: 10 — plans and indexes (apprenticeship page `10-query-plans-and-indexes`, not in this repo) ·
+07 — zero-downtime migrations (apprenticeship page `07-zero-downtime-migrations`, not in this repo) ·
+03 — concurrency (apprenticeship page `03-concurrency-races`, not in this repo).
+(These pages are in the author's separate, unpublished apprenticeship workspace, not in this repository.)

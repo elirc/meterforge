@@ -5,7 +5,8 @@ before you open the sealed answer. The skill is *directing and verifying*. Diagn
 "explain before touching" questions first, or you'll have nothing to review the agent's work against.
 
 Setup for every drill: a worktree of the incident branch, never `main`:
-`git -C C:\Users\Owner\Desktop\meterforge worktree add ..\mf-drill-<n> training/incidents/<branch>`.
+`git -C <your-meterforge-clone> worktree add ..\mf-drill-<n> training/incidents/<branch>`.
+(As of 2026-10-06 the `training/incidents/*` branches are not on GitHub; see the status note in `training/README.md`. From a fresh clone, write the spec and review the agent's output against the brief, but you cannot run the drill code.)
 Give the agent **only** the worktree path, your spec and the allowed files. Don't point it at `training/_answers/` or `learn/_answers/`.
 
 ---
@@ -56,7 +57,7 @@ Tick each one with evidence (command output, or `path:line`), not with "looks fi
 
 **Scope and diff**
 - [ ] `git diff --stat` touches only the files you allowed. Nothing under `src/MeterForge.Domain/` unless your spec said so.
-- [ ] No edits in `main`'s working tree (it holds your own uncommitted Usage changes). `git -C C:\Users\Owner\Desktop\meterforge status` looks the same as before.
+- [ ] No edits in `main`'s working tree (it holds your own uncommitted Usage changes). `git -C <your-meterforge-clone> status` looks the same as before.
 
 **Tests that actually test**
 - [ ] `dotnet build MeterForge.slnx` is clean. `Directory.Build.props` treats warnings as errors, so a suppressed warning is a red flag.
@@ -74,7 +75,7 @@ Tick each one with evidence (command output, or `path:line`), not with "looks fi
 **Claims vs evidence**
 - [ ] Every number in the PR description (reads, p95, 1205 count) matches output you can see. Re-run at least one yourself.
 - [ ] Locking hints (`UPDLOCK`, `HOLDLOCK`, `READPAST`) come with a stated transaction scope. A hint in a single-statement implicit transaction protects nothing (INC-003 bonus).
-- [ ] `/health/ready` claims (`src/MeterForge.Api/Program.cs:47-53`) aren't extended with things the code doesn't check.
+- [ ] `/health/ready` claims (`src/MeterForge.Api/Program.cs:56-62` on today's `main`; `47-53` at `43ee18d`) aren't extended with things the code doesn't check.
 - [ ] No placeholders: `TODO` in `Down()`, benchmarks that don't flush the plan cache, `catch { }` around SQL errors other than 2601/2627.
 
 The full agent workflow for ladder M2 is in `training/agentic/WORKFLOW.md`, and its rubric is in `training/_answers/agentic-rubric.md`. Do it after these drills.

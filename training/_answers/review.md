@@ -3,6 +3,12 @@
 Ranked by production severity for a **usage-billing** product. Line numbers are from `git show HEAD:<path>`.
 [AI-smell] = typical old-AI-generated smell.
 
+> **Note added 2026-10-06 (this record is frozen at `43ee18d`; grade your review against that commit).** Commit `4e3f344` (2026-09-30) changed `main` after this answer key was written:
+> - **Findings 1–3 are fixed on today's `main`.** `InMemoryUsageEventStore.GetOrAddAsync` uses `ConcurrentDictionary.GetOrAdd` and returns the winner. `UsageIngestionService.cs:23-30` normalizes before the key is used and throws `usage.idempotency_conflict` on a changed payload. `BusinessRuleExceptionHandler.cs:13-14` maps that code to **409**. Tests: `UsageIngestionTests` (race, normalized replay, 4 changed-payload cases) and `UsageApiTests.CreateReadReplayConflict_PreservesTheOriginalResource`.
+> - **Finding 10 is narrowed, not closed.** Only `usage.idempotency_conflict` became 409. `subscription.version_conflict` is still 422.
+> - **Findings 4–9 and 11–20 still hold on today's `main`.** The line numbers moved: `Program.cs:27-30` is now `31-34`, and `47-53` is now `56-62`. `PaymentEndpoints.cs:14-17`, `PaymentService.cs:18`, `SubscriptionEndpoints.cs:26` and `TieredRating.cs:33` are unchanged.
+> - **Findings 21–25 cite the `training/lab/sqlserver` branch.** It is not on GitHub (see the status note in [`../README.md`](../README.md)).
+
 ## S1 — money wrong, data lost, or security
 
 1. **The ingestion path can report "created" for an event it never stored.** `UsageIngestionService.cs:19-24` does find-then-add; `InMemoryUsageEventStore.cs:21` calls `TryAdd` and **ignores the `false` result**. Two concurrent deliveries of the same event both miss the lookup, both get `IsReplay=false`, and both receive different `id`s, but only one is stored. The client stores an id that doesn't exist. *Why it matters:* SDKs log/reconcile by the returned id; support can't find the event; if the payload differed, the billed quantity is whichever write won. *Fix:* make the store's add atomic and return the stored winner (`GetOrAdd`, or a unique index + read-back on SQL). [AI-smell] (check-then-act with a discarded return value).

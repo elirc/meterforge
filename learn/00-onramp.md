@@ -1,7 +1,7 @@
 # MeterForge on-ramp: 7 warm-ups before `training/`
 
 Do these in order. Write each answer down **before** you check `learn/_answers/00-onramp.md`.
-Read committed code with `git show HEAD:<path>`, because your working tree has local edits in the Usage area.
+Read committed code with `git show <commit>:<path>`. Exercises 1–2 work on any commit. **Exercises 3–5 study the usage-ingestion code at `43ee18d`**, so use `git show 43ee18d:<path>`. Commit `4e3f344` (2026-09-30) repaired that code, so on today's `main` exercise 4's bug no longer reproduces (note added 2026-10-06).
 Exercises 1–5 need nothing but the repo. Exercises 6–7 read the lab branch. None of them needs SQL Server.
 
 ---
@@ -38,7 +38,7 @@ Point to the two lines whose disagreement causes Scenario B's result. (Hint: one
 ## 5. Write one characterization test (30 min)
 Pin Scenario B from exercise 4 exactly as it behaves **today**. Don't fix anything. Work in a detached worktree so your local edits stay untouched:
 ```powershell
-git -C C:\Users\Owner\Desktop\meterforge worktree add --detach ..\mf-onramp HEAD
+git -C <your-meterforge-clone> worktree add --detach ..\mf-onramp 43ee18d
 cd ..\mf-onramp
 ```
 Add the test next to the existing ones in `tests/MeterForge.Application.Tests/Usage/UsageIngestionTests.cs`, using the same style

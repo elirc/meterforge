@@ -3,6 +3,8 @@
 All answers come from reading committed code (`main` @ `43ee18d` plus the training commits, and lab branch `d7a4fd6`). None of them was executed in the B08 pass,
 which was docs-only. Where an answer depends on runtime behaviour, your own run is the authority. If it disagrees with this file, trust your run and note it.
 
+> **Note added 2026-10-06.** Answers 3–5 describe `43ee18d`, and the line numbers were re-checked against `git show 43ee18d:<path>`. On today's `main` (after `4e3f344`), the trace in answer 3 is `UsageIngestionService.cs:23-30` → `InMemoryUsageEventStore.GetOrAddAsync` (`ConcurrentDictionary.GetOrAdd`). `FindByExternalIdAsync` and `AddAsync` no longer exist, so the reference test in answer 5 only compiles at `43ee18d`. The registrations are now `Program.cs:34` and `:39`. Answers 6–7 cite lab commit `d7a4fd6`, which is not on GitHub.
+
 ## 1. Money
 | Call | Result |
 |---|---|
@@ -59,7 +61,7 @@ public async Task Ingest_PaddedDuplicate_ReturnsCreatedWithIdThatIsNotStored()
 }
 ```
 Grading: the test must **pass on `main`**. If you "fixed" the bug so the test asserts a replay, you wrote a spec test, not a characterization test (see
-[curriculum 04](../../../opusorganize/apprenticeship/curriculum/04-characterization-tests.md)). When someone fixes the trim mismatch, this test is the one that should flip, on purpose.
+curriculum 04 (apprenticeship page `04-characterization-tests`, not in this repo)). When someone fixes the trim mismatch, this test is the one that should flip, on purpose.
 Not executed in B08: the `dotnet test` result is yours to produce.
 
 ## 6. Schema
